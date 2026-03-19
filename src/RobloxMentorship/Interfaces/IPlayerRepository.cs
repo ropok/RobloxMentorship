@@ -8,7 +8,8 @@ namespace RobloxMentorship.Interfaces;
 /// </summary>
 public interface IPlayerRepository
 {
-    void         Save(Player player);
-    Player?      GetByName(string name);
-    List<Player> GetAll();
+    Task SaveAsync(Player player);
+    Task<Player?> GetByNameAsync(string name);
+    Task<List<Player>> GetAllAsync();
+
 }

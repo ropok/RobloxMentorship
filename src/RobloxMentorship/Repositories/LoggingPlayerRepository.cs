@@ -16,25 +16,24 @@ public class LoggingPlayerRepository : IPlayerRepository
     private readonly IPlayerRepository _inner;
 
     public LoggingPlayerRepository(IPlayerRepository inner)
-    {
-        _inner = inner;
-    }
+    => _inner = inner;
 
-    public void Save(Player player)
+
+    public async Task SaveAsync(Player player)
     {
         Console.WriteLine($"[LOG] Saving player: {player.Name}");
-        _inner.Save(player);
+        await _inner.SaveAsync(player);
     }
 
-    public Player? GetByName(string name)
+    public async Task<Player?> GetByNameAsync(string name)
     {
         Console.WriteLine($"[LOG] Getting player by name: {name}");
-        return _inner.GetByName(name);
+        return await _inner.GetByNameAsync(name);
     }
 
-    public List<Player> GetAll()
+    public async Task<List<Player>> GetAllAsync()
     {
         Console.WriteLine("[LOG] Getting all players");
-        return _inner.GetAll();
+        return await _inner.GetAllAsync();
     }
 }

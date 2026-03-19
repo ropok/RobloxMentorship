@@ -12,16 +12,22 @@ public class InMemoryPlayerRepository : IPlayerRepository
 {
     private readonly List<Player> _players = new();
 
-    public void Save(Player player)
+    public Task SaveAsync(Player player)
     {
         var existing = _players.FirstOrDefault(p => p.Name == player.Name);
         if (existing != null) _players.Remove(existing);
         _players.Add(player);
         Console.WriteLine($"[InMemory] Saved player: {player.Name}");
+        return Task.CompletedTask;
     }
 
-    public Player? GetByName(string name)
-        => _players.FirstOrDefault(p => p.Name == name);
+    public Task<Player?> GetByNameAsync(string name)
+    {
+        var player = _players.FirstOrDefault(p => p.Name == name);
+        return Task.FromResult(player);
+    }
 
-    public List<Player> GetAll() => _players;
+    public Task<List<Player>> GetAllAsync()
+      => Task.FromResult(_players);
 }
+

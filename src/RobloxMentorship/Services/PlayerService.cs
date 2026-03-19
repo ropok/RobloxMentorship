@@ -12,44 +12,52 @@ public class PlayerService
     private readonly IPlayerRepository _repository;
 
     public PlayerService(IPlayerRepository repository)
-    {
-        _repository = repository;
-    }
+      => _repository = repository;
 
-    public void RegisterPlayer(string name, int level)
+
+    public async Task RegisterPlayerAsync(string name, int level)
     {
+        // Validate input - throw specific exceptions for bad data
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Player name cannot be empty.", nameof(name));
+
+        if (level < 1 || level > 100)
+            throw new ArgumentOutOfRangeException(nameof(level), "Level must between 1 and 100.");
+
         var player = new Player(name, level);
         player.GoOnline();
-        _repository.Save(player);
+        await _repository.SaveAsync(player);
     }
 
-    public void AwardExperience(string playerName, double xp)
+    public async Task AwardExperienceAsync(string playerName, double xp)
     {
-        var player = _repository.GetByName(playerName);
+        if (xp <= 0)
+            throw new ArgumentOutOfRangeException(nameof(xp), "XP must be greater than zero.");
+        var player = await _repository.GetByNameAsync(playerName);
         if (player == null)
         {
             Console.WriteLine($"Player '{playerName}' not found.");
             return;
         }
         player.AddExperience(xp);
-        _repository.Save(player);
+        await _repository.SaveAsync(player);
     }
 
-    public void LevelUpPlayer(string playerName)
+    public async Task LevelUpPlayerAsync(string playerName)
     {
-        var player = _repository.GetByName(playerName);
+        var player = await _repository.GetByNameAsync(playerName);
         if (player == null)
         {
             Console.WriteLine($"Player '{playerName}' not found.");
             return;
         }
         player.LevelUp();
-        _repository.Save(player); // always persist after mutation
+        await _repository.SaveAsync(player); // always persist after mutation
     }
 
-    public void PrintAllPlayers()
+    public async Task PrintAllPlayersAsync()
     {
-        var players = _repository.GetAll();
+        var players = await _repository.GetAllAsync();
         if (!players.Any())
         {
             Console.WriteLine("No players registered.");
@@ -64,9 +72,9 @@ public class PlayerService
     /// Returns top N players sorted by Level descending.
     /// Sorting is business logic — it lives in the service, not the repository.
     /// </summary>
-    public void GetTopPlayers(int count)
+    public async Task GetTopPlayersAsync(int count)
     {
-        var players = _repository.GetAll();
+        var players = await _repository.GetAllAsync();
         if (!players.Any())
         {
             Console.WriteLine("No players registered.");
@@ -76,5 +84,15 @@ public class PlayerService
         Console.WriteLine($"\n=== Top {count} Players ===");
         foreach (var player in top)
             Console.WriteLine(player.GetSummary());
+    }
+
+    public async Task<Player?> GetPlayerAsync(string name)
+    {
+        var player = await _repository.GetByNameAsync(name);
+        if (player == null)
+        {
+            throw new InvalidOperationException("Player is not found!");
+        }
+        return await Task.FromResult(player);
     }
 }
