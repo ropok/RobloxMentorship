@@ -47,22 +47,11 @@ try
     //
 
     // Research Question: Task.WhenAll make sure all the tasks were completed, meanwhile Task.WhenAny() just wait only one task to be completed.
-    var tasks = new List<Task>();
-    tasks.Add(service.RegisterPlayerAsync("Builderman", 42));
-    tasks.Add(service.RegisterPlayerAsync("Kuga", 5));
-    tasks.Add(service.RegisterPlayerAsync("Kraft", 11));
-
-    Task t = Task.WhenAll(tasks);
-    try
-    {
-        t.Wait();
-    }
-    catch (System.Exception)
-    {
-
-        throw;
-    }
-
+    await Task.WhenAll(
+    service.RegisterPlayerAsync("Builderman", 42),
+    service.RegisterPlayerAsync("Kuga", 5),
+    service.RegisterPlayerAsync("Kraft", 11)
+        );
 
     await service.AwardExperienceAsync("Kuga", 500);
     await service.GetTopPlayersAsync(2);
@@ -101,12 +90,25 @@ try
         Console.WriteLine($"[CAUGHT ArgumentOutOfRangeException] {ex.Message}");
     }
 
+
+
+    // Test 4: GetPlayerAsync with missing player
+    try
+    {
+        await service.GetPlayerAsync("Ghost");
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine($"[CAUGHT InvalidOperationException] {ex.Message}");
+    }
+
     Console.WriteLine("\n App is still running after all exceptions.");
 }
-catch (System.Exception)
+catch (Exception ex)
 {
-
-    Console.WriteLine("This should never happen - investigate immidiately");
+    Console.WriteLine($"[FATAL] This should never happen -- investigate immediately.");
+    Console.WriteLine($"[FATAL] {ex.GetType().Name}: {ex.Message} ");
+    Console.WriteLine($"[FATAL] Stack trace: {ex.StackTrace}");
     throw;
 }
 

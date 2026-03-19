@@ -91,8 +91,8 @@ public class PlayerService
         var player = await _repository.GetByNameAsync(name);
         if (player == null)
         {
-            throw new InvalidOperationException("Player is not found!");
+            throw new InvalidOperationException($"Player '{name}' is not found!");
         }
-        return await Task.FromResult(player);
+        return player;
     }
 }
